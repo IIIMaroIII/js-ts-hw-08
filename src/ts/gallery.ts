@@ -1,3 +1,9 @@
+import * as basiclightbox from 'basiclightbox';
+
+const lightboxInstance = basiclightbox.create(`
+<img class="lightbox__img" src="" alt="">
+`);
+
 const images: Images = [
   {
     preview: 'https://cdn.pixabay.com/photo/2019/05/14/16/43/rchids-4202820__480.jpg',
@@ -61,10 +67,23 @@ const refs: Refs = {
 
 refs.list?.addEventListener('click', onImageClick);
 
+if (refs.list) {
+  refs.list.append(...makeGalleryItems(images));
+}
+
 function onImageClick(e: Event) {
   e.preventDefault();
   const target = e.target as HTMLImageElement;
-  console.log(target.dataset.source);
+
+  if (lightboxInstance && target.tagName === 'IMG') {
+    lightboxInstance.show();
+
+    const lightboxImgEl = document.querySelector<HTMLImageElement>('.lightbox__img') ?? null;
+    if (!lightboxImgEl) throw new Error('Cannot get lightboxImg element');
+
+    lightboxImgEl.src = target.dataset.source ?? '';
+    lightboxImgEl.alt = target.alt;
+  }
 }
 
 function makeGalleryItemElement({ preview, original, description }: Image): HTMLLIElement {
@@ -103,8 +122,4 @@ function makeGalleryItemElement({ preview, original, description }: Image): HTML
 }
 function makeGalleryItems(images: Images): HTMLLIElement[] {
   return images?.map(makeGalleryItemElement);
-}
-
-if (refs.list) {
-  refs.list.append(...makeGalleryItems(images));
 }
